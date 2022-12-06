@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -34,8 +34,7 @@ class Post(Base):
     __tablename__ = 'post'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
-    post_name = Column(String(250), nullable=False)
-    post_description = Column(String(250), nullable=False)   
+      
 
     def serialize(self):
         return{
@@ -45,33 +44,48 @@ class Post(Base):
             "post_description" : self.post_description,            
         }
 
-class Following(Base):
-    __tablename__ = 'follow'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    follow_id = Column(Integer, primary_key=True)
-    follow_to_user = relationship("User", back_populates="user_to_folllow")   
+class Follower(Base):
+    __tablename__ = 'follower'
+    id = Column(Integer, primary_key=True)    
+    user_from_id = Column(Integer, ForeignKey('user.id'))
+    user_to_id = Column(Integer, ForeignKey('user.id'))
+      
 
     def serialize(self):
-        return{
-            "id" : self.id,
-            "user_id" : self.user_id,
-            "follow_id" : self.follow_id,                        
+        return{  
+            "id" : self.id,          
+            "user_from_id" : self.user_from_id,
+            "user_to_id" : self.user_to_id                        
         }
 
-class Favorites(Base):
-    __tablename__ = 'favorites'
+class Comment(Base):
+    __tablename__ = 'comment'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    favorites_post_id = Column(Integer, ForeignKey('post.id'), primary_key=True)
-    favorites_post = relationship("User", back_populates="user_favorites_post")   
+    comment_text = Column(String(250), nullable=False)
+    author_id = Column(Integer, ForeignKey('user.id'))
+    post_id = Column(Integer, ForeignKey('post.id'))       
 
     def serialize(self):
         return{
             "id" : self.id,
-            "user_id" : self.user_id,
-            "follow_id" : self.follow_id,                        
-        }                                        
+            "comment_text" : self.comment_text,
+            "author_id" : self.author_id                        
+        }
+
+class Media(Base):
+    __tablename__ = 'media'
+    id = Column(Integer, primary_key=True)
+    type = Column(Enum, nullable=False)
+    url = Column(String(250), nullable=False)
+    post_id = Column(Integer, ForeignKey('post.id'))       
+
+    def serialize(self):
+        return{
+            "id" : self.id,
+            "type" : self.type,
+            "url" : self.url,
+            "post_id": self.post_id                        
+        }                                                
 
 
 
